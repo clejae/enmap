@@ -1,0 +1,51 @@
+Complete setup for synthmix of California ecosystems
+
+1. Determine subset sites for each ecoregion & create shapefiles
+- script: 01_create_subset_site_shp.py
+- input: point shapefile with location of bottom left corner(SW-corner) of the subset site
+- output: polygon shapefile with a polygon representing boundaries of subset site, 30x30km, naming convetion: xx_subsetY (xx = abbrev. for area, Y = index of subset site)
+
+2. Create virtual raster for each subset site 
+- script: 02_create_vrt_from_shp.py
+- inputs: subset site polygon shapefile & raster-mosaic
+- output: VRT of subset site (subVRT)
+
+3. Create training libraries (lib)
+- script: 03a_speclib_from_shp_aggregated_and_pixel-wise.py
+- input: VRT of subset site & training-polygons shapefile
+- output: pixel-wise lib & aggregated lib 
+- !!!! create .json-file of libs manually !!!!
+
+4. Create validation images (valimg) of subset site
+- script: 04_generate_val_img.py
+- input: VRT of subset site & validation-polygons shapefile
+- output: valimg of subset site
+
+5. Create reference images (refimg) corresponding to the valimgs
+- scripts: 06_shp_to_ref_img
+- input: VRT of subset site & validation-polygons shapefile
+- output: refimg of subset site
+
+6. Unmixing
+script: 05_synthmix
+6.1 Unmix valimgs
+- scripts: 05_syntmix for single valimg processing & 05b_synthmix_parallel for parallel processing (e.g. of all valimgs of a mosaic)
+- input: valimg of subset site & pixel-wise lib/aggregated lib
+- output: fraction images of valimg (frac_valimg)
+
+6.2 Unmix complete subset site 
+- scripts: 05_syntmix for single subset processing & 05b_synthmix_parallel for parallel processing (e.g. of all subsets of a mosaic)
+- input: subVRT & pixel-wise lib/aggregated lib
+- output: fraction image of complete subset site (frac_subset)
+
+7.1 Validation of frac_valimg
+- scripts: 07_validation
+- input: frac_valimg & refimg 
+- output: scatterplots with accuracies
+
+7.2 Validation of frac_subset
+7.2.1 transform frac_subset to form of frac_valimg
+- script: 07b_generate_val_img_from_prediction.py
+- input: frac_subset & validation-polygons shapefile
+- output: fraction img that has the same dimensions as a valimg
+--> 7.2.2 The validation of this image is the same as in 7.1

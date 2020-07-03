@@ -1,0 +1,2 @@
+- mosaics of yosemite and santabarbara are not in the same grid as the others
+- no validation polygons available for lake tahoe, yosemite and santabarbara
